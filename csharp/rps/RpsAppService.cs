@@ -2,6 +2,8 @@ using RPS.Domain;
 using static RPS.Domain.Commands;
 using static RPS.Api.Rps;
 
+namespace RPS;
+
 public interface IAppService
 {
     Task Handle(object command);
@@ -9,14 +11,30 @@ public interface IAppService
 
 public class RpsAppService : IAppService
 {
-    public Task HandleCreate(CreateGameCommand cmd)
+    private readonly IRpsRepository _repository;
+    public RpsAppService(IRpsRepository repository) => _repository = repository;
+
+    private async Task<Game> GetCurrentState(Guid gameId)
     {
-        throw new NotImplementedException();
+        // Get events from the repository
+        var events = await _repository.Load(gameId);
+        // This is a left fold over the events to return the game state:
+        return events.Aggregate(new Game(), (g, e) => Game.Apply(g, e));
     }
 
-    public Task HandleMove(MakeMoveCommand cmd)
+    // TODO: can we make this more DRY?
+    public async Task HandleCreate(CreateGameCommand cmd)
     {
-        throw new NotImplementedException();
+        Game game = await GetCurrentState(cmd.GameId);
+        var events = game.handle(cmd);
+        await _repository.Save(cmd.GameId, events);
+    }
+
+    public async Task HandleMove(MakeMoveCommand cmd)
+    {
+        Game game = await GetCurrentState(cmd.GameId);
+        var events = game.handle(cmd);
+        await _repository.Save(cmd.GameId, events);
     }
 
     public Task Handle(object command) =>

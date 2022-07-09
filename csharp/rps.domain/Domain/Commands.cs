@@ -3,6 +3,7 @@ namespace RPS.Domain;
 public interface ICommand
 {
     Guid AggregateId { get; }
+    Guid GameId { get; }
 }
 public class Commands
 {
