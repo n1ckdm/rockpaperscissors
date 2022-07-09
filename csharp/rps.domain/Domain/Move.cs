@@ -9,6 +9,21 @@ public class Move
     public static readonly Move Paper = new Move() { _move = EMove.Paper };
     public static readonly Move Scissors = new Move() { _move = EMove.Scissors };
 
+    public static Move FromString(string move)
+    {
+        switch (move)
+        {
+            case "Rock":
+                return Rock;
+            case "Paper":
+                return Paper;
+            case "Scissors":
+                return Scissors;
+            default:
+                throw new ArgumentException("Invalid move");
+        }
+    }
+
     public bool Defeats(Move other)
     {
         if (other == null)
