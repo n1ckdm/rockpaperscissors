@@ -1,6 +1,6 @@
 using RPS.Domain;
 using static RPS.Domain.Commands;
-namespace RPS.Api;
+using static RPS.Api.Rps;
 
 public interface IAppService
 {
@@ -22,9 +22,9 @@ public class RpsAppService : IAppService
     public Task Handle(object command) =>
         command switch
         {
-            Rps.V1.Create cmd => HandleCreate(new CreateGameCommand(new Guid(), cmd.Email)),
+            V1.Create cmd => HandleCreate(new CreateGameCommand(new Guid(), cmd.Email)),
 
-            Rps.V1.Move cmd => HandleMove(new MakeMoveCommand(
+            V1.Move cmd => HandleMove(new MakeMoveCommand(
                 cmd.GameId,
                 cmd.Email,
                 Move.FromString(cmd.MoveType)

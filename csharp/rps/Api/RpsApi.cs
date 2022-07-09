@@ -2,8 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace RPS.Api;
 
-[ApiController]
-[Route("[rps]")]
+[Route("/rps")]
 public class RpsApi : ControllerBase
 {
     private readonly RpsAppService _appService;
@@ -34,12 +33,12 @@ public class RpsApi : ControllerBase
         }
     }
     
-    [HttpPost(Name = "Create")]
-    public async Task<IActionResult> Create(Rps.V1.Create request) =>
+    [HttpPost]
+    public async Task<IActionResult> Post(Rps.V1.Create request) =>
         await HandleRequest<Rps.V1.Create>(request);
 
     [Route("move")]
-    [HttpPost(Name = "Move")]
-    public async Task<IActionResult> Move(Rps.V1.Move request) =>
+    [HttpPut]
+    public async Task<IActionResult> Put(Rps.V1.Move request) =>
         await HandleRequest<Rps.V1.Move>(request);
 }
