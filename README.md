@@ -1,6 +1,6 @@
 # 🪨📃✂️
 
-This is a small project playing around with a simple Domain Model based around the game Rock Paper Scissors. Inspired by a blog post by [Jan Kronquist](https://blog.jayway.com/2013/03/08/aggregates-event-sourcing-distilled/) and a number of excellent talks by Greg Young, but this one in particular.
+This is a small project playing around with a simple Domain Model based around the game Rock Paper Scissors. Inspired by a blog post by [Jan Kronquist](https://blog.jayway.com/2013/03/08/aggregates-event-sourcing-distilled/) and a number of excellent talks by Greg Young, but [this one](https://vimeo.com/131636650) in particular.
 
 ## Why do this?
 
@@ -8,6 +8,8 @@ The aim here was to take the ideas from Greg and implement them in a simple Doma
 
 - Immutable Aggregates (state isn't mutated inside the commands, instead events are returned)
 - Pattern matching to help make the code more DRY and functional
+- C# Record types
+- Implementing a left fold over the Event list to return the current state of an object
 
 ## What's left to do?
 
