@@ -1,4 +1,5 @@
 using RPS.Domain;
+using RPS.Api;
 using static RPS.Domain.Commands;
 using static RPS.Api.Rps;
 
@@ -6,7 +7,8 @@ namespace RPS;
 
 public interface IAppService
 {
-    Task Handle(object command);
+    Task HandleContract(IContract command);
+    Task Handle(ICommand command);
 }
 
 public class RpsAppService : IAppService
@@ -22,27 +24,30 @@ public class RpsAppService : IAppService
         return events.Aggregate(new Game(), (g, e) => Game.Apply(g, e));
     }
 
-    // TODO: can we make this more DRY?
-    public async Task HandleCreate(CreateGameCommand cmd)
+    public async Task Handle(ICommand cmd)
     {
         Game game = await GetCurrentState(cmd.GameId);
-        var events = game.handle(cmd);
+        List<IEvent> events;
+        switch (cmd)
+        {
+            case CreateGameCommand c:
+                events = game.Handle(c);
+                break;
+            case MakeMoveCommand c:
+                events = game.Handle(c);
+                break;
+            default:
+                throw new NotImplementedException();
+        }
         await _repository.Save(cmd.GameId, events);
     }
 
-    public async Task HandleMove(MakeMoveCommand cmd)
-    {
-        Game game = await GetCurrentState(cmd.GameId);
-        var events = game.handle(cmd);
-        await _repository.Save(cmd.GameId, events);
-    }
-
-    public Task Handle(object command) =>
+    public Task HandleContract(IContract command) =>
         command switch
         {
-            V1.Create cmd => HandleCreate(new CreateGameCommand(new Guid(), cmd.Email)),
+            V1.Create cmd => Handle(new CreateGameCommand(Guid.NewGuid(), cmd.Email)),
 
-            V1.Move cmd => HandleMove(new MakeMoveCommand(
+            V1.Move cmd => Handle(new MakeMoveCommand(
                 cmd.GameId,
                 cmd.Email,
                 Move.FromString(cmd.MoveType)

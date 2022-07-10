@@ -13,13 +13,13 @@ public class RpsApi : ControllerBase
         _logger = logger;
     }
 
-    private async Task<IActionResult> HandleRequest<T>(T request)
+    private async Task<ActionResult> HandleRequest<T>(T request) where T : IContract
     {
         try
         {
             _logger.LogDebug($"Handling HTTP request of type {typeof(T).Name}");
             ArgumentNullException.ThrowIfNull(request, nameof(request));
-            await _appService.Handle(request);
+            await _appService.HandleContract(request);
             return Ok();
         }
         catch (Exception e)
@@ -34,7 +34,7 @@ public class RpsApi : ControllerBase
     }
     
     [HttpPost]
-    public async Task<IActionResult> Post(Rps.V1.Create request) =>
+    public async Task<ActionResult> Post(Rps.V1.Create request) =>
         await HandleRequest<Rps.V1.Create>(request);
 
     [Route("move")]

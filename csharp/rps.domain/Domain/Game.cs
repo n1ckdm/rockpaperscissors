@@ -4,7 +4,7 @@ namespace RPS.Domain;
 
 public class Game
 {
-    enum EState 
+    public enum EState 
     {
         Constructed, Created, Waiting, Tied, Won
     }
@@ -13,7 +13,10 @@ public class Game
     private String? Player { get; init; }
     private Move? Move { get; init; }
 
-    public List<IEvent> handle(CreateGameCommand cmd)
+    public bool GameTied => State == EState.Tied;
+    public bool GameWon => State == EState.Won;
+
+    public List<IEvent> Handle(CreateGameCommand cmd)
     {
         if (State != EState.Constructed)
             throw new InvalidOperationException($"Game already created: {State}");
@@ -24,7 +27,7 @@ public class Game
         };
     }
 
-    public List<IEvent> handle(MakeMoveCommand cmd)
+    public List<IEvent> Handle(MakeMoveCommand cmd)
     {
         if (EState.Created == State)
         {
@@ -44,7 +47,7 @@ public class Game
         }
         else
         {
-            throw new InvalidOperationException($"Invalud game state: {State}");
+            throw new InvalidOperationException($"Invalid game state: {State}");
         }
     }
 
@@ -78,12 +81,18 @@ public class Game
                     Player = e.PlayerEmail,
                 };
             case MoveDecidedEvent e:
-                return new Game
+                if (game.State == EState.Created)
                 {
-                    State = EState.Waiting,
-                    Player = e.PlayerEmail,
-                    Move = e.Move,
-                };
+                    return new Game
+                    {
+                        State = EState.Waiting,
+                        Player = e.PlayerEmail,
+                        Move = e.Move,
+                    };
+                } else
+                {
+                    return game;
+                }
             case GameWonEvent e:
                 return new Game
                 {
