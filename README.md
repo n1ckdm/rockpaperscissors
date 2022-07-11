@@ -20,4 +20,5 @@ I'm keen to add some additional features to this repo including:
 - A process manager and with event handlers (for handling multiple games?)
 - Implementation of a [Event Store DB](https://www.eventstore.com/) for persistance
 - A multi paradigm implementation with the Domain Model in F# and the Application Layer in C#
-- Write an article on DEV.to about this codebase
+- Write an article on DEV.to about this code
+- Add Lizard and Spock to the move types
