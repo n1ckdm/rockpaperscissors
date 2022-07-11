@@ -16,34 +16,26 @@ public class RpsAppService : IAppService
     private readonly IRpsRepository _repository;
     public RpsAppService(IRpsRepository repository) => _repository = repository;
 
-    private async Task<Game> GetCurrentState(Guid gameId)
-    {
-        // Get events from the repository
-        var events = await _repository.Load(gameId);
-        // This is a left fold over the events to return the game state:
-        return events.Aggregate(new Game(), (g, e) => Game.Apply(g, e));
-    }
+    private async Task<Game> GetCurrentState(Guid gameId) =>
+        (await _repository.Load(gameId)).Aggregate(new Game(), (g, e) => Game.Apply(g, e));
+
+    private List<IEvent> SendToAggregate(ICommand command, Game game) =>
+        command switch
+        {
+            CreateGameCommand c => game.Handle(c),
+            MakeMoveCommand c => game.Handle(c),
+            _ => throw new NotImplementedException()
+        };
 
     public async Task Handle(ICommand cmd)
     {
         Game game = await GetCurrentState(cmd.GameId);
-        List<IEvent> events;
-        switch (cmd)
-        {
-            case CreateGameCommand c:
-                events = game.Handle(c);
-                break;
-            case MakeMoveCommand c:
-                events = game.Handle(c);
-                break;
-            default:
-                throw new NotImplementedException();
-        }
+        List<IEvent> events = SendToAggregate(cmd, game);
         await _repository.Save(cmd.GameId, events);
     }
 
-    public Task HandleContract(IContract command) =>
-        command switch
+    public Task HandleContract(IContract contract) =>
+        contract switch
         {
             V1.Create cmd => Handle(new CreateGameCommand(Guid.NewGuid(), cmd.Email)),
 
